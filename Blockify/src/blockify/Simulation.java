@@ -16,7 +16,7 @@ public class Simulation extends Panels implements ActionListener{
     private JPanel header, leftPanel, centerPanel, rightPanel, timerPanel, mainPanel, footer, speedPanel, infoPanel, 
             orderPanel, totalPanel, bottomLeftPanel, bottomRightPanel, seekTimePanel;
     private JLabel logoLabel, titleLabel, timerLabel,orderLabel, totalLabel, headLocationLabel, seekTimeLabel; 
-    public JButton pdfButton, imgButton, restartButton, plusButton, minusButton;
+    public JButton pdfButton, imgButton, restartButton, plusButton, minusButton, stopButton;
     public JButton backButton;
     private JTextField speedTextField;
     private Simulator simulator;
@@ -139,16 +139,18 @@ public class Simulation extends Panels implements ActionListener{
         speedPanel.add(plusButton);
         
         restartButton = createButton(150,40, "Restart", red, white,white, 16,1, this);
+        stopButton = createButton(150,40, "Stop", darkpink, white,white, 16,1, this);
         
-        bottomLeftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
+        bottomLeftPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 10, 5));
         bottomLeftPanel.setPreferredSize(new Dimension(740, 60));
         bottomLeftPanel.setOpaque(false);
-        bottomRightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 5));
+        bottomRightPanel = new JPanel(new FlowLayout(FlowLayout.TRAILING, 10, 5));
         bottomRightPanel.setPreferredSize(new Dimension(740, 60));
         bottomRightPanel.setOpaque(false);
         
         bottomLeftPanel.add(speedPanel);
         bottomLeftPanel.add(restartButton);
+        bottomLeftPanel.add(stopButton);
         bottomRightPanel.add(pdfButton);
         bottomRightPanel.add(imgButton);
         

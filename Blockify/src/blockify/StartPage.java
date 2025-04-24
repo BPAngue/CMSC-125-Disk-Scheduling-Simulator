@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -27,7 +29,8 @@ public class StartPage extends Panels implements ActionListener{
             generateButton, resetButton, randomButton, textButton;
     public JComboBox directionBox;
     
-    public ArrayList<String> cylinderDetails = new ArrayList<>();
+    public List<Integer> randomCylinders = new ArrayList<>();
+    public List<String> cylinderDetails = new ArrayList<>();
     
     // for storing inputs to simulator class
     public String[] tokens;
@@ -167,19 +170,37 @@ public class StartPage extends Panels implements ActionListener{
         simulator.clearCylinderQueue();*/
     }
     
+    public List<Integer> selectUniqueRandomValues(int n) {
+        
+        int start = 0;
+        int end = 199;
+        
+        for (int i = start; i < end; i++) {
+            randomCylinders.add(i);
+        }
+
+        Collections.shuffle(randomCylinders);
+        return randomCylinders.subList(0, n);
+    }
+    
+    public String convertListToString(List<Integer> list) {
+        StringBuilder sb = new StringBuilder();
+        for (Integer number : list) {
+            sb.append(number).append(" ");
+        }
+        return sb.toString().trim(); // Removes the trailing space
+    }
+    
     private void generateRandomInput(){
         Random r = new Random();
         int randomLength = r.nextInt(10, 40);
+        int random = r.nextInt((randomLength));
         
         lengthField.setText(String.valueOf(randomLength));
-        
-        String cylinderQueue = "";
-        
-        for (int i=0; i<randomLength; i++){
-            cylinderQueue = cylinderQueue + String.valueOf(r.nextInt(0, 200)) + " ";
-        }
+        String cylinderQueue = convertListToString(selectUniqueRandomValues(randomLength));
         
         cylinderField.setText(cylinderQueue);
+        headField.setText(String.valueOf(randomCylinders.get(random)));
     }
     
     private File uploadFile() {
@@ -217,12 +238,13 @@ public class StartPage extends Panels implements ActionListener{
         if (selectedFile != null) {
             readFile(selectedFile);
             
-            /*if (!cylinderDetails.isEmpty()) {
-                cylinderField.setText(cylinderDetails.get(0));
-                headField.setText(cylinderDetails.get(1));
+            if (!cylinderDetails.isEmpty()) {
+                lengthField.setText(cylinderDetails.get(0));
+                cylinderField.setText(cylinderDetails.get(1));
+                headField.setText(cylinderDetails.get(2));
             } else {
                 System.out.println("No data found in file");
-            }*/
+            }
         }
     }
     
