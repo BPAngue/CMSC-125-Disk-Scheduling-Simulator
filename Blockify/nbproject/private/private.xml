@@ -3,10 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Brian%20Pangue/Documents/Brian%20Files/UP/UP%20CompSci/3rd%20Year/2nd%20Semester/CMSC%20125%20-%20Operating%20Systems/Laboratory/Disk%20Scheduling%20Simulator/CMSC-125-Disk-Scheduling-Simulator/Blockify/src/blockify/Simulation.java</file>
-            <file>file:/C:/Users/Brian%20Pangue/Documents/Brian%20Files/UP/UP%20CompSci/3rd%20Year/2nd%20Semester/CMSC%20125%20-%20Operating%20Systems/Laboratory/Disk%20Scheduling%20Simulator/CMSC-125-Disk-Scheduling-Simulator/Blockify/src/blockify/MainMenu.java</file>
-            <file>file:/C:/Users/Brian%20Pangue/Documents/Brian%20Files/UP/UP%20CompSci/3rd%20Year/2nd%20Semester/CMSC%20125%20-%20Operating%20Systems/Laboratory/Disk%20Scheduling%20Simulator/CMSC-125-Disk-Scheduling-Simulator/Blockify/src/blockify/FCFS.java</file>
-            <file>file:/C:/Users/Brian%20Pangue/Documents/Brian%20Files/UP/UP%20CompSci/3rd%20Year/2nd%20Semester/CMSC%20125%20-%20Operating%20Systems/Laboratory/Disk%20Scheduling%20Simulator/CMSC-125-Disk-Scheduling-Simulator/Blockify/src/blockify/CartesianPanel.java</file>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/CMSC-125-Disk-Scheduling-Simulator/Blockify/src/blockify/Simulation.java</file>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/CMSC-125-Disk-Scheduling-Simulator/Blockify/src/blockify/BlockifyMain.java</file>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/CMSC-125-Disk-Scheduling-Simulator/Blockify/src/blockify/SimulationAll.java</file>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/CMSC-125-Disk-Scheduling-Simulator/Blockify/src/blockify/MainMenu.java</file>
+            <file>file:/C:/Users/User/Documents/NetBeansProjects/CMSC-125-Disk-Scheduling-Simulator/Blockify/src/blockify/StartPage.java</file>
         </group>
     </open-files>
 </project-private>

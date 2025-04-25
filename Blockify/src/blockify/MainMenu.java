@@ -27,6 +27,7 @@ public class MainMenu extends JPanel implements ActionListener{
     Simulator simulator = new Simulator();
     StartPage startPanel = new StartPage(simulator);
     Simulation simulationPanel = new Simulation(simulator);
+    SimulationAll simulationAllPanel = new SimulationAll(simulator);
     
     public MainMenu (CardLayout cardLayout, JPanel cardPanel){
         this.cardLayout = cardLayout;
@@ -87,6 +88,7 @@ public class MainMenu extends JPanel implements ActionListener{
         cardPanel.add(aboutPanel, "ABOUT");
         cardPanel.add(startPanel, "START");
         cardPanel.add(simulationPanel, "SIMULATION");
+        cardPanel.add(simulationAllPanel, "SIMULATION_ALL");
         
         startPanel.backButton.addActionListener(this);
         startPanel.generateButton.addActionListener(this);
@@ -94,6 +96,7 @@ public class MainMenu extends JPanel implements ActionListener{
         helpPanel.backButton.addActionListener(this);
         aboutPanel.backButton.addActionListener(this);
         simulationPanel.backButton.addActionListener(this);
+        simulationAllPanel.backButton.addActionListener(this);
         
     }   
     
@@ -137,12 +140,24 @@ public class MainMenu extends JPanel implements ActionListener{
                 simulator.addCylinder(cylinder);
             }
             
-            cardPanel.remove(simulationPanel);
-            simulationPanel = new Simulation(simulator);
-            simulationPanel.backButton.addActionListener(this);
-            cardPanel.add(simulationPanel, "SIMULATION");
-            simulationPanel.startSimulation(simulator.getAlgorithm());
-            cardLayout.show(cardPanel, "SIMULATION");
+            if (simulator.getAlgorithm().equals("ALL")) {
+                // System.out.println("ALL"); // for debugging
+                // simulate all
+                cardPanel.remove(simulationAllPanel);
+                simulationAllPanel = new SimulationAll (simulator);
+                simulationAllPanel.backButton.addActionListener(this);
+                cardPanel.add(simulationAllPanel, "ALL");
+                cardLayout.show(cardPanel, "ALL");
+            } else {
+                // System.out.println("Other algorithms"); // for debugging
+                // normal page simulator panel
+                cardPanel.remove(simulationPanel);
+                simulationPanel = new Simulation(simulator);
+                simulationPanel.backButton.addActionListener(this);
+                cardPanel.add(simulationPanel, "SIMULATOR");
+                simulationPanel.startSimulation(simulator.getAlgorithm());
+                cardLayout.show(cardPanel, "SIMULATOR");
+            }  
             
             // for debugging
             System.out.println("Algorithm: " + simulator.getAlgorithm());

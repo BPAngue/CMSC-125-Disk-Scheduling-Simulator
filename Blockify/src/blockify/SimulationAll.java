@@ -1,6 +1,7 @@
 package blockify;
 
 import com.itextpdf.text.Document;
+import com.itextpdf.text.Image;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfWriter;
 import java.awt.Dimension;
@@ -21,24 +22,40 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
-public class Simulation extends Panels implements ActionListener{
+public class SimulationAll extends Panels implements ActionListener{
     
     private JPanel header, leftPanel, centerPanel, rightPanel, timerPanel, mainPanel, footer, speedPanel, infoPanel, 
             orderPanel, totalPanel, bottomLeftPanel, bottomRightPanel, seekTimePanel;
     private JLabel logoLabel, titleLabel, timerLabel,orderLabel, totalLabel, headLocationLabel, seekTimeLabel, cylinderValues, orderPanelTitle; 
     public JButton pdfButton, imgButton, restartButton, plusButton, minusButton, stopButton;
     public JButton backButton;
+    public JTabbedPane tabbedPane;
     private JTextField speedTextField;
     private Simulator simulator;
     
+    private JPanel fcfsPanel, sstfPanel, scanPanel, cscanPanel, lookPanel, clookPanel;
+    
     // for simulation
-    CartesianPanel cartesian;
-    ArrayList<Integer> diskQueueLabel = new ArrayList<>();
+    CartesianPanel cartesianFcfs;
+    CartesianPanel cartesianSstf;
+    CartesianPanel cartesianScan;
+    CartesianPanel cartesianCscan;
+    CartesianPanel cartesianLook;
+    CartesianPanel cartesianClook;
+    
+    ArrayList<Integer> diskQueueLabelFcfs = new ArrayList<>();
+    ArrayList<Integer> diskQueueLabelSstf = new ArrayList<>();
+    ArrayList<Integer> diskQueueLabelScan = new ArrayList<>();
+    ArrayList<Integer> diskQueueLabelCscan = new ArrayList<>();
+    ArrayList<Integer> diskQueueLabelLook = new ArrayList<>();
+    ArrayList<Integer> diskQueueLabelClook = new ArrayList<>();
+    
     private Object currentSimulator;
     
-    public Simulation(Simulator simulator){
+    public SimulationAll(Simulator simulator){
         this.simulator = simulator;
         
         setLayout(new FlowLayout(FlowLayout.CENTER, 0,0));
@@ -94,7 +111,7 @@ public class Simulation extends Panels implements ActionListener{
         centerPanel.setPreferredSize(new Dimension(300, 200));
         centerPanel.setOpaque(false);
         
-        titleLabel = createLabel(820, 80, white, simulator.getAlgorithm(), 50);
+        titleLabel = createLabel(820, 80, white, "FCFS", 50);
         titleLabel.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 0));
         titleLabel.setHorizontalAlignment(center);
         
@@ -129,51 +146,36 @@ public class Simulation extends Panels implements ActionListener{
         rightPanel.add(totalPanel);
         rightPanel.add(timerPanel);
         
-        // main simulator panel
-        mainPanel = new JPanel(new FlowLayout(FlowLayout.CENTER,30,0));
-        mainPanel.setPreferredSize(new Dimension(1480, 470));
-        mainPanel.setBackground(pink);
-        mainPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(white, 1), 
-                BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(black, 6), 
-                        BorderFactory.createEmptyBorder(0, 10, 0,10))));
-        
-        infoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        infoPanel.setPreferredSize(new Dimension(1460, 40));
-        infoPanel.setBackground(pink);
-        
-        headLocationLabel = createLabel(610, 40, white, "Head Location: " + simulator.getHeadLocation(), 20);
-        headLocationLabel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(pink, 1)
-                ,BorderFactory.createEmptyBorder(0,20,0,0)));
-        
-        seekTimePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0,0));
-        seekTimePanel.setPreferredSize(new Dimension(250, 40));
-        seekTimePanel.setBackground(darkpink);
-        seekTimeLabel = createLabel(300, 40, white, "Seek Time: ", 20);
-        seekTimePanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(pink, 1)
-                ,BorderFactory.createEmptyBorder(0,20,0,20)));
-        seekTimePanel.add(seekTimeLabel);
-        
-        infoPanel.add(headLocationLabel);
-        infoPanel.add(seekTimePanel);
-        
-        // cartesianPanel
-        diskQueueLabel = simulator.getCylinders();
-        int headLocation = simulator.getHeadLocation();
-        if (!diskQueueLabel.contains(headLocation)) {
-            diskQueueLabel.add(headLocation);
-        }
-        
-        cartesian = new CartesianPanel(diskQueueLabel);
-        cartesian.setPreferredSize(new Dimension(1460, 410));
-        cartesian.setBackground(white);
-        
-        mainPanel.add(infoPanel);
-        mainPanel.add(cartesian);
-        
         header.add(leftPanel);
         header.add(centerPanel);
         header.add(rightPanel);
+        
+        fcfsPanel = addMainPanel(cartesianFcfs);
+        sstfPanel = addMainPanel(cartesianSstf);
+        scanPanel = addMainPanel(cartesianScan);
+        cscanPanel = addMainPanel(cartesianCscan);
+        lookPanel = addMainPanel(cartesianLook);
+        clookPanel = addMainPanel(cartesianClook);
+        
+        tabbedPane = new JTabbedPane();
+        tabbedPane.setPreferredSize(new Dimension(1480, 500));
+        tabbedPane.setFocusable(false);
+        tabbedPane.setBackground(white);
+        tabbedPane.setForeground(darkpink);
+        tabbedPane.setFont(archivoblack.deriveFont(14f));
+        tabbedPane.setTabPlacement(JTabbedPane.BOTTOM);
+        tabbedPane.add("FCFS", fcfsPanel);
+        tabbedPane.add("SSTF", sstfPanel);
+        tabbedPane.add("SCAN", scanPanel);
+        tabbedPane.add("C-SCAN", cscanPanel);
+        tabbedPane.add("LOOK", lookPanel);
+        tabbedPane.add("C-LOOK", clookPanel);
+        
+        tabbedPane.addChangeListener(e -> {
+            int selectedIndex = tabbedPane.getSelectedIndex();
+            String title = tabbedPane.getTitleAt(selectedIndex);
+            titleLabel.setText(title);
+        });
         
         footer = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 5));
         footer.setPreferredSize(new Dimension(1480, 60));
@@ -214,7 +216,7 @@ public class Simulation extends Panels implements ActionListener{
         footer.add(bottomRightPanel);
         
         add(header);
-        add(mainPanel);
+        add(tabbedPane);
         add(footer);
     }
    
@@ -227,52 +229,139 @@ public class Simulation extends Panels implements ActionListener{
         }
     }
     
-    private File makeScreenshotsDirectory() {
+    public JPanel addMainPanel(CartesianPanel cartesian){
+        // main simulator panel
+        JPanel mainPanel = new JPanel(new FlowLayout(FlowLayout.CENTER,30,0));
+        mainPanel.setPreferredSize(new Dimension(1480, 470));
+        mainPanel.setBackground(pink);
+        mainPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(white, 1), 
+                BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(black, 6), 
+                        BorderFactory.createEmptyBorder(0, 10, 0,10))));
+        
+        JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        infoPanel.setPreferredSize(new Dimension(1460, 40));
+        infoPanel.setBackground(pink);
+        
+        JLabel headLocationLabel = createLabel(610, 40, white, "Head Location: " + simulator.getHeadLocation(), 20);
+        headLocationLabel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(pink, 1)
+                ,BorderFactory.createEmptyBorder(0,20,0,0)));
+        
+        JPanel seekTimePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0,0));
+        seekTimePanel.setPreferredSize(new Dimension(250, 40));
+        seekTimePanel.setBackground(darkpink);
+        JLabel seekTimeLabel = createLabel(300, 40, white, "Seek Time: ", 20);
+        seekTimePanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(pink, 1)
+                ,BorderFactory.createEmptyBorder(0,20,0,20)));
+        seekTimePanel.add(seekTimeLabel);
+        
+        infoPanel.add(headLocationLabel);
+        infoPanel.add(seekTimePanel);
+        
+        // cartesianPanel
+        ArrayList<Integer> diskQueueLabel = simulator.getCylinders();
+        int headLocation = simulator.getHeadLocation();
+        if (!diskQueueLabel.contains(headLocation)) {
+            diskQueueLabel.add(headLocation);
+        }
+        
+        cartesian = new CartesianPanel(diskQueueLabel);
+        cartesian.setPreferredSize(new Dimension(1460, 410));
+        cartesian.setBackground(white);
+        
+        mainPanel.add(infoPanel);
+        mainPanel.add(cartesian);
+        
+        return mainPanel;
+    }
+    
+    public void saveTabbedPaneAsPNG() throws Exception {
+        if (tabbedPane == null || tabbedPane.getTabCount() == 0) {
+            throw new Exception("TabbedPane is empty or null.");
+        }
+
+        // Calculate total height required for the combined image
+        int totalHeight = 0;
+        int width = this.getWidth();
+
+        // Get the height of each tab by capturing its image
+        ArrayList<BufferedImage> tabImages = new ArrayList<>();
+        for (int i = 0; i < tabbedPane.getTabCount(); i++) {
+            tabbedPane.setSelectedIndex(i); // Activate the tab
+            tabbedPane.revalidate();
+            tabbedPane.repaint();
+
+            BufferedImage tabImage = new BufferedImage(width, this.getHeight(), BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2 = tabImage.createGraphics();
+            this.paint(g2);
+            g2.dispose();
+
+            tabImages.add(tabImage);
+            totalHeight += tabImage.getHeight(); // Add height of this tab to total height
+        }
+
+        // Create a new image with the combined height
+        BufferedImage combinedImage = new BufferedImage(width, totalHeight, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2 = combinedImage.createGraphics();
+
+        // Draw each tab's image onto the combined image
+        int yOffset = 0;
+        for (BufferedImage tabImage : tabImages) {
+            g2.drawImage(tabImage, 0, yOffset, null);
+            yOffset += tabImage.getHeight(); // Move the yOffset down by the height of the current tab
+        }
+        g2.dispose();
+
+        // Save the combined image as a PNG
         File dir = new File("screenshots");
         if (!dir.exists()) {
             dir.mkdirs();
         }
-        
-        return dir;
+
+        SimpleDateFormat formatter = new SimpleDateFormat("MMddyy_HHmmss");
+        String timestamp = formatter.format(new Date());
+        File outputFile = new File(dir, timestamp + "_PG.png");
+
+        ImageIO.write(combinedImage, "png", outputFile);
     }
 
-    private File saveAsPNG(String fileName) throws IOException {
-        makeScreenshotsDirectory();
-        
-        // Capture panel as image
-        BufferedImage image = new BufferedImage(this.getWidth(), this.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = image.createGraphics();
-        this.printAll(g2d);
-        g2d.dispose();
-    
-        // Save the image as a PNG file
-        File pngFile = new File("screenshots/" + fileName + ".png");
-        ImageIO.write(image, "PNG", pngFile);
-        
-        return pngFile;
-    }
-    
-    public void savePanelAsPDF(String fileName) throws Exception {
-        makeScreenshotsDirectory();
-        
-        
-        // Create a BufferedImage and paint the panel onto it
-        BufferedImage image = new BufferedImage(this.getWidth(), this.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = image.createGraphics();
-        this.printAll(g2d);
-        g2d.dispose();
+    public void saveTabbedPaneAsPDF() throws Exception {
+        if (tabbedPane == null || tabbedPane.getTabCount() == 0) {
+            throw new Exception("JTabbedPane is empty or null!");
+        }
 
-        File pdfFile = new File("screenshots/" + fileName + ".pdf");
-        
+        // Create screenshots directory if it doesn't exist
+        File dir = new File("screenshots");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        // Generate filename with timestamp
+        SimpleDateFormat formatter = new SimpleDateFormat("MMddyy_HHmmss");
+        String timestamp = formatter.format(new Date());
+        String filename = timestamp + "_PG.pdf";
+        File outputFile = new File(dir, filename);
+
         // Create PDF document
         Document document = new Document(new com.itextpdf.text.Rectangle(this.getWidth(), this.getHeight()));
-        PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(pdfFile));
+        PdfWriter.getInstance(document, new FileOutputStream(outputFile));
         document.open();
 
-        PdfContentByte contentByte = writer.getDirectContent();
-        com.itextpdf.text.Image pdfImage = com.itextpdf.text.Image.getInstance(image, null);
-        pdfImage.setAbsolutePosition(0, 0);
-        contentByte.addImage(pdfImage);
+        for (int i = 0; i < tabbedPane.getTabCount(); i++) {
+            tabbedPane.setSelectedIndex(i);
+
+            BufferedImage image = new BufferedImage(this.getWidth(), this.getHeight(), BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2 = image.createGraphics();
+            this.paint(g2);
+            g2.dispose();
+
+            Image pdfImage = Image.getInstance(image, null);
+            pdfImage.setAbsolutePosition(0, 0);
+            pdfImage.scaleToFit(this.getWidth(), this.getHeight());
+
+            document.newPage();
+            document.add(pdfImage);
+        }
 
         document.close();
     }
@@ -280,26 +369,21 @@ public class Simulation extends Panels implements ActionListener{
     @Override
     public void actionPerformed(ActionEvent e) {
        if (e.getSource() == imgButton) {
-            SimpleDateFormat sdf = new SimpleDateFormat("MMddyy_HHmmss");
-            String timestamp = sdf.format(new Date());
-
-            String fileName = timestamp + "_PG";
             try {
-                File pngFile = saveAsPNG(fileName);
-                JOptionPane.showMessageDialog(this, "PNG successfully saved to \\Blockify\\screenshots!", "Save Successful", JOptionPane.INFORMATION_MESSAGE);
-            } catch (IOException f) {
-                f.printStackTrace();
+                saveTabbedPaneAsPNG();
+                JOptionPane.showMessageDialog(this, "Files successfully saved to \\Swappify\\screenshots!", "Save Successful", JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
         }
         
         else if (e.getSource() == pdfButton) {
             SimpleDateFormat sdf = new SimpleDateFormat("MMddyy_HHmmss");
             String timestamp = sdf.format(new Date());
-            String fileName = timestamp + "_PG";
 
             try {
-                savePanelAsPDF(fileName);
-                JOptionPane.showMessageDialog(this, "PDF successfully saved to \\Blockify\\screenshots!", "Save Successful", JOptionPane.INFORMATION_MESSAGE);
+                saveTabbedPaneAsPDF();
+                JOptionPane.showMessageDialog(this, "PDF successfully saved to \\Swappify\\screenshots!", "Save Successful", JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception ex) {
                ex.printStackTrace();
             }
