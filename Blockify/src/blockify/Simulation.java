@@ -4,22 +4,27 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-
 public class Simulation extends Panels implements ActionListener{
     
     private JPanel header, leftPanel, centerPanel, rightPanel, timerPanel, mainPanel, footer, speedPanel, infoPanel, 
             orderPanel, totalPanel, bottomLeftPanel, bottomRightPanel, seekTimePanel;
-    private JLabel logoLabel, titleLabel, timerLabel,orderLabel, totalLabel, headLocationLabel, seekTimeLabel; 
+    private JLabel logoLabel, titleLabel, timerLabel,orderLabel, totalLabel, headLocationLabel, seekTimeLabel, cylinderValues, orderPanelTitle; 
     public JButton pdfButton, imgButton, restartButton, plusButton, minusButton, stopButton;
     public JButton backButton;
     private JTextField speedTextField;
     private Simulator simulator;
+    
+    // for simulation
+    CartesianPanel cartesian;
+    ArrayList<Integer> diskQueueLabel = new ArrayList<>();
+    private Object currentSimulator;
     
     public Simulation(Simulator simulator){
         this.simulator = simulator;
@@ -33,13 +38,39 @@ public class Simulation extends Panels implements ActionListener{
         logoLabel = new JLabel();
         logoLabel.setIcon(smallLogoIcon);
         
-        orderPanel = new JPanel(new FlowLayout());
+        orderPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 1));
         orderPanel.setPreferredSize(new Dimension(590,40));
-        orderLabel = createLabel(590, 40, white, "Order of Requests: ", 12);
+        orderPanelTitle = new JLabel("Order of Request: ");
+        orderPanelTitle.setFont(archivoblack.deriveFont(16f));
+        orderPanelTitle.setForeground(white);
+        orderPanel.add(orderPanelTitle);
+        
+        float fontStyle;
+        if (simulator.getLength() <= 20) {
+            fontStyle = 13f;
+        } else {
+            fontStyle = 10f;
+        }
+        
+        int count = 0;
+        for (int cylinder : simulator.getCylinders()) {
+            String cylinderText = "" + cylinder;
+            if (count < simulator.getCylinders().size() - 1) {
+                cylinderText += ",";
+            }
+            
+            cylinderValues = new JLabel(cylinderText);
+            cylinderValues.setFont(archivoblack.deriveFont(fontStyle));
+            cylinderValues.setForeground(white);
+            orderPanel.add(cylinderValues);
+            count++;
+        }
+        
+        //orderLabel = createLabel(590, 40, white, "Order of Requests: " + simulator.getCylinders(), 12);
         orderPanel.setBackground(darkpink);
         orderPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(white, 1),
                 BorderFactory.createEmptyBorder(0,10,0,0)));
-        orderPanel.add(orderLabel);
+        // orderPanel.add(orderLabel);
         
         leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0,13));
         leftPanel.setPreferredSize(new Dimension(590, 200));
@@ -51,7 +82,7 @@ public class Simulation extends Panels implements ActionListener{
         centerPanel.setPreferredSize(new Dimension(300, 200));
         centerPanel.setOpaque(false);
         
-        titleLabel = createLabel(820, 80, white,   "Algorithm", 20);
+        titleLabel = createLabel(820, 80, white, simulator.getAlgorithm(), 20);
         titleLabel.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 0));
         titleLabel.setHorizontalAlignment(center);
         
@@ -96,10 +127,10 @@ public class Simulation extends Panels implements ActionListener{
                         BorderFactory.createEmptyBorder(0, 10, 0,10))));
         
         infoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        infoPanel.setPreferredSize(new Dimension(1460, 60));
+        infoPanel.setPreferredSize(new Dimension(1460, 40));
         infoPanel.setBackground(pink);
         
-        headLocationLabel = createLabel(610, 40, white, "Head Location: ", 20);
+        headLocationLabel = createLabel(610, 40, white, "Head Location: " + simulator.getHeadLocation(), 20);
         headLocationLabel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(pink, 1)
                 ,BorderFactory.createEmptyBorder(0,20,0,0)));
         
@@ -113,8 +144,21 @@ public class Simulation extends Panels implements ActionListener{
         
         infoPanel.add(headLocationLabel);
         infoPanel.add(seekTimePanel);
+        
+        // cartesianPanel
+        diskQueueLabel = simulator.getCylinders();
+        int headLocation = simulator.getHeadLocation();
+        if (!diskQueueLabel.contains(headLocation)) {
+            diskQueueLabel.add(headLocation);
+        }
+        
+        cartesian = new CartesianPanel(diskQueueLabel);
+        cartesian.setPreferredSize(new Dimension(1460, 410));
+        cartesian.setBackground(white);
+        
         mainPanel.add(infoPanel);
-
+        mainPanel.add(cartesian);
+        
         header.add(leftPanel);
         header.add(centerPanel);
         header.add(rightPanel);
@@ -160,6 +204,15 @@ public class Simulation extends Panels implements ActionListener{
         add(header);
         add(mainPanel);
         add(footer);
+    }
+   
+    public void startSimulation(String algorithm) {
+        switch(algorithm) {
+            case "FCFS":
+                currentSimulator = new FCFS(simulator.getCylinders(), simulator.getHeadLocation());
+                ((FCFS) currentSimulator).startSimulation();
+                break;
+        }
     }
 
     @Override

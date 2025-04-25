@@ -19,6 +19,7 @@ public class MainMenu extends JPanel implements ActionListener{
     public JPanel cardPanel, outerPanel, titlePanel, buttonPanel;
     public JButton startButton, helpButton, aboutButton, exitButton;
     public JLabel titleLabel;
+    public String token[];
     
     Panels panels = new Panels();
     Help helpPanel = new Help();
@@ -114,10 +115,10 @@ public class MainMenu extends JPanel implements ActionListener{
             cardLayout.show(cardPanel, "ABOUT");
         }
         else if (e.getSource()==startButton || e.getSource()==simulationPanel.backButton ) {
-            /*simulator.clearAlgorithm();
+            simulator.clearAlgorithm();
             simulator.clearHeadLocation();
             simulator.clearLength();
-            simulator.clearCylinderQueue();*/
+            simulator.clearCylinderQueue();
             startPanel.clearInputs();
             cardLayout.show(cardPanel, "START");
         }
@@ -126,7 +127,29 @@ public class MainMenu extends JPanel implements ActionListener{
             cardLayout.show(cardPanel, "MAIN_MENU");
         }
         else if (e.getSource()==startPanel.generateButton && startPanel.validateInput()){
+            // add values to simulator class
+            simulator.setAlgorithm(startPanel.algorithmField.getText());
+            simulator.setHeadLocation(startPanel.headField.getText());
+            simulator.setLength(startPanel.lengthField.getText());
+            simulator.setDirection((String) startPanel.directionBox.getSelectedItem());
+            token = startPanel.cylinderField.getText().split(" ");
+            for (String cylinder : token) {
+                simulator.addCylinder(cylinder);
+            }
+            
+            cardPanel.remove(simulationPanel);
+            simulationPanel = new Simulation(simulator);
+            simulationPanel.backButton.addActionListener(this);
+            cardPanel.add(simulationPanel, "SIMULATION");
+            simulationPanel.startSimulation(simulator.getAlgorithm());
             cardLayout.show(cardPanel, "SIMULATION");
+            
+            // for debugging
+            System.out.println("Algorithm: " + simulator.getAlgorithm());
+            System.out.println("Cylinders in the queue: " + simulator.getCylinders());
+            System.out.println("Length of queue: " + simulator.getLength());
+            System.out.println("Head Location: " + simulator.getHeadLocation());
+            System.out.println("Direction: " + simulator.getDirection());
         }
     }
     

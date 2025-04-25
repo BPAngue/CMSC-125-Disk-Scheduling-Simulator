@@ -6,8 +6,8 @@ import java.util.ArrayList;
 public class Simulator {
     
     private final ArrayList<Integer> cylinders = new ArrayList<>();
-    private String algorithm;
-    private int length, head, direction;
+    private String algorithm, direction;
+    private int length, head;
     public int speed;
     
     public Simulator(){
@@ -64,10 +64,10 @@ public class Simulator {
     }
     
      public void setDirection(String direction){
-        this.direction = Integer.parseInt(direction);
+        this.direction = direction;
     }
     
-    public int getDirection(){
+    public String getDirection(){
         return direction;
     }
 }

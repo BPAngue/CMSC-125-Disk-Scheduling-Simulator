@@ -92,7 +92,6 @@ public class StartPage extends Panels implements ActionListener{
         algorithmPanel.add(clookButton);
         algorithmPanel.add(allButton);
         
-        
         outlineLabel = createLabel(740, 40, white, "Computation Outline", 16f);
         outlineLabel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 0));
         
@@ -152,8 +151,6 @@ public class StartPage extends Panels implements ActionListener{
         add(titlePanel);
         add(selectionPanel);
         add(errorLabel);
-        
-       
     }
 
     public void clearInputs(){
@@ -164,14 +161,13 @@ public class StartPage extends Panels implements ActionListener{
         errorLabel.setText("");
         
         // clear inputs in Simulator class
-        /*simulator.clearAlgorithm();
+        simulator.clearAlgorithm();
         simulator.clearHeadLocation();
         simulator.clearLength();
-        simulator.clearCylinderQueue();*/
+        simulator.clearCylinderQueue();
     }
     
-    public List<Integer> selectUniqueRandomValues(int n) {
-        
+    public List<Integer> selectUniqueRandomValues(int n) { 
         int start = 0;
         int end = 199;
         
