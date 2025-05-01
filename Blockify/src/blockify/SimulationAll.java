@@ -24,6 +24,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.Timer;
 
 public class SimulationAll extends Panels implements SimulationContext, ActionListener{
     
@@ -51,6 +52,7 @@ public class SimulationAll extends Panels implements SimulationContext, ActionLi
     // same Disk queue label for each
     ArrayList<Integer> diskQueueLabel = new ArrayList<>();
     
+    
     // different head movements instances for each
     public ArrayList<Movement> headMovementsFcfs = new ArrayList<>();
     public ArrayList<Movement> headMovementsSstf = new ArrayList<>();
@@ -74,6 +76,8 @@ public class SimulationAll extends Panels implements SimulationContext, ActionLi
     private JLabel timerLabelCscan;
     private JLabel timerLabelLook;
     private JLabel timerLabelClook;
+    
+    private Timer timerFcfs, timerSstf, timerScan, timerCscan, timerLook, timerClook;
     
     // classes
     private FCFS fcfs;
@@ -164,7 +168,7 @@ public class SimulationAll extends Panels implements SimulationContext, ActionLi
         totalPanel.setBackground(darkpink);
         totalPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(0,0,0,50)
                 , BorderFactory.createLineBorder(white, 1)));
-        totalLabel = createLabel(280, 40, white, "Total head movements:", 12);
+        totalLabel = createLabel(280, 40, white, "Direction of Movement: " + simulator.getDirection(), 15);
         totalPanel.add(totalLabel);
         
         timerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -279,7 +283,7 @@ public class SimulationAll extends Panels implements SimulationContext, ActionLi
         speedPanel.add(plusButton);
         
         restartButton = createButton(150,40, "Restart", red, white,white, 16,1, this);
-        stopButton = createButton(150,40, "Stop", darkpink, white,white, 16,1, this);
+        stopButton = createButton(150,40, "Pause", darkpink, white,white, 16,1, this);
         
         bottomLeftPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 10, 5));
         bottomLeftPanel.setPreferredSize(new Dimension(740, 60));
@@ -498,8 +502,74 @@ public class SimulationAll extends Panels implements SimulationContext, ActionLi
                ex.printStackTrace();
             }
         }
+        
+        else if (e.getSource() == stopButton) {
+            if (stopButton.getText().equalsIgnoreCase("Pause")) {
+                stopCurrentSimulation();
+                pdfButton.setEnabled(true);
+                imgButton.setEnabled(true);
+                plusButton.setEnabled(true);
+                minusButton.setEnabled(true);
+                stopButton.setText("Play");
+            } else if (stopButton.getText().equalsIgnoreCase("Play")){
+                int newSpeed = Integer.parseInt(speedTextField.getText());
+                setNewSpeed(newSpeed);
+                
+                pdfButton.setEnabled(false);
+                imgButton.setEnabled(false);
+                plusButton.setEnabled(false);
+                minusButton.setEnabled(false);
+                stopButton.setText("Pause");
+            }
+        }
+        
+        else if (e.getSource() == restartButton) {
+            fcfs.stopSimulation();
+            sstf.stopSimulation();
+            scan.stopSimulation();
+            cscan.stopSimulation();
+            look.stopSimulation();
+            clook.stopSimulation();
+            
+            // Reset GUI Labels
+            seekTimeLabelFcfs.setText("Seek Time: 0");
+            seekTimeLabelSstf.setText("Seek Time: 0");
+            seekTimeLabelScan.setText("Seek Time: 0");
+            seekTimeLabelCscan.setText("Seek Time: 0");
+            seekTimeLabelLook.setText("Seek Time: 0");
+            seekTimeLabelClook.setText("Seek Time: 0");
+            
+            timerLabelFcfs.setText("Timer: 00:00");
+            timerLabelSstf.setText("Timer: 00:00");
+            timerLabelScan.setText("Timer: 00:00");
+            timerLabelCscan.setText("Timer: 00:00");
+            timerLabelLook.setText("Timer: 00:00");
+            timerLabelClook.setText("Timer: 00:00");
+            
+            // Reset Internal states
+            simulationFinished = false;
+            stopButton.setEnabled(true);
+            stopButton.setText("Pause");
+            
+            // clear previous movements
+            headMovementsFcfs.clear();
+            headMovementsSstf.clear();
+            headMovementsScan.clear();
+            headMovementsCscan.clear();
+            headMovementsLook.clear();
+            headMovementsClook.clear();
+            
+            // start a fresh simulation
+            startSimulation();
+            
+            // disable speed adjustments and save buttons during simulation
+            pdfButton.setEnabled(false);
+            imgButton.setEnabled(false);
+            plusButton.setEnabled(false);
+            minusButton.setEnabled(false);
+        }
        
-       else if (e.getSource() == plusButton) {
+        else if (e.getSource() == plusButton) {
             int speed = Integer.parseInt(speedTextField.getText());
             if (speed < 2000) {
                 if (speed == 100) {
@@ -529,7 +599,7 @@ public class SimulationAll extends Panels implements SimulationContext, ActionLi
             }
         }
     }
-
+   
     @Override
     public void updateSeekTimeLabel(int totalSeekTime) {}
     
@@ -610,5 +680,59 @@ public class SimulationAll extends Panels implements SimulationContext, ActionLi
         imgButton.setEnabled(true);
         plusButton.setEnabled(true);
         minusButton.setEnabled(true);
+    }
+
+    private void stopCurrentSimulation() {
+        fcfs.stopSimulation();
+        fcfs.recordPauseStart();
+        
+        sstf.stopSimulation();
+        sstf.recordPauseStart();
+        
+        scan.stopSimulation();
+        scan.recordPauseStart();
+        
+        cscan.stopSimulation();
+        cscan.recordPauseStart();
+        
+        look.stopSimulation();
+        look.recordPauseStart();
+        
+        clook.stopSimulation();
+        clook.recordPauseStart();
+    }
+    
+    private void setNewSpeed(int newSpeed) {
+        fcfs.setSimulationSpeed(newSpeed);
+        fcfs.resumeAfterPause();
+        
+        sstf.setSimulationSpeed(newSpeed);
+        sstf.resumeAfterPause();
+        
+        scan.setSimulationSpeed(newSpeed);
+        scan.resumeAfterPause();
+        
+        cscan.setSimulationSpeed(newSpeed);
+        cscan.resumeAfterPause();
+        
+        look.setSimulationSpeed(newSpeed);
+        look.resumeAfterPause();
+        
+        clook.setSimulationSpeed(newSpeed);
+        clook.resumeAfterPause();
+        
+        timerFcfs = fcfs.getTimer();
+        timerSstf = sstf.getTimer();
+        timerScan = scan.getTimer();
+        timerCscan = cscan.getTimer();
+        timerLook = look.getTimer();
+        timerClook = clook.getTimer();
+        
+        timerFcfs.start();
+        timerSstf.start();
+        timerScan.start();
+        timerCscan.start();
+        timerLook.start();
+        timerClook.start();
     }
 }

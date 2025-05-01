@@ -291,9 +291,8 @@ public class StartPage extends Panels implements ActionListener{
             readFile(selectedFile);
             
             if (!cylinderDetails.isEmpty()) {
-                lengthField.setText(cylinderDetails.get(0));
-                cylinderField.setText(cylinderDetails.get(1));
-                headField.setText(cylinderDetails.get(2));
+                cylinderField.setText(cylinderDetails.get(0));
+                headField.setText(cylinderDetails.get(1));
             } else {
                 System.out.println("No data found in file");
             }

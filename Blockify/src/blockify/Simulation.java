@@ -132,7 +132,7 @@ public class Simulation extends Panels implements SimulationContext, ActionListe
         totalPanel.setBackground(darkpink);
         totalPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(0,0,0,50)
                 , BorderFactory.createLineBorder(white, 1)));
-        totalLabel = createLabel(280, 40, white, "Total head movements:", 12);
+        totalLabel = createLabel(280, 40, white, "Direction of Movement: " + simulator.getDirection(), 15);
         totalPanel.add(totalLabel);
         
         timerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));

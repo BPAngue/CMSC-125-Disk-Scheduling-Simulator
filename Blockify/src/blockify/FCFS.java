@@ -101,6 +101,12 @@ public class FCFS implements PausableSimulator, Runnable {
         System.out.println("Total Head Movements (Seek Time): " + totalSeekTime);
     }
     
+    public void stopSimulation() {
+        if (timer != null && timer.isRunning()) {
+            timer.stop();
+        }
+    }
+    
     private void displayGraph() {
         cartesian.repaint();
     }
