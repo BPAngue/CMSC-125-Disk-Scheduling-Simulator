@@ -67,15 +67,6 @@ public class CartesianPanel extends JPanel {
             
             double yLength = (double)(Y_AXIS_SECOND_Y_COORD - Y_AXIS_FIRST_Y_COORD) / (yCoordLength - 1);
             
-            // draw y-axis line
-            g2.drawLine(Y_AXIS_X_COORD, Y_AXIS_FIRST_Y_COORD, Y_AXIS_X_COORD, Y_AXIS_SECOND_Y_COORD);
-        
-            // draw y-axis ticks
-            for (int i = 0; i < yCoordLength; i++) {
-                int y = (int)(Y_AXIS_FIRST_Y_COORD + i * yLength);
-                g2.drawLine(Y_AXIS_X_COORD - 5, y, Y_AXIS_X_COORD + 5, y);
-            }
-            
             // draw x-axis ticks and rotated labels
             for (int value : sortedLabels) {
                 if (value == 0 || value == 199) continue;

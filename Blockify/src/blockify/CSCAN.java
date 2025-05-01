@@ -1,6 +1,3 @@
-/* need editing: make sure that headLocation is always added into diskQueue
-*/
-
 package blockify;
 
 import java.awt.event.ActionEvent;
@@ -13,10 +10,12 @@ public class CSCAN implements PausableSimulator, Runnable {
     
     private final ArrayList<Integer> diskQueue;
     private final ArrayList<Integer> sortedDiskQueue;
+    private final ArrayList<Integer> lowerValues = new ArrayList<>();
+    private final ArrayList<Integer> higherValues = new ArrayList<>();
     private final ArrayList<Movement> headMovements;
     private int headLocation;
     private int simulationSpeed;
-    private final String directionOfMovement;
+    private String directionOfMovement;
     private final CartesianPanel cartesian;
     private final SimulationContext simulation;
     private final Simulator simulator;
@@ -26,7 +25,8 @@ public class CSCAN implements PausableSimulator, Runnable {
     private boolean isPaused = false;
     private long pauseStartTime;
     private int totalSeekTime = 0;
-    private int iteration = 0;
+    private int index1 = 0;
+    private int index2 = 0;
     private Timer timer;
     
     public CSCAN(Simulator simulator, CartesianPanel cartesian, ArrayList<Integer> diskQueue, ArrayList<Movement> headMovements, int headLocation, String directionOfMovement, int simulationSpeed, SimulationContext simulation) {
@@ -40,12 +40,26 @@ public class CSCAN implements PausableSimulator, Runnable {
         this.simulator = simulator;
         
         this.sortedDiskQueue = new ArrayList<>(diskQueue);
-        if (!sortedDiskQueue.contains(headLocation)) {
-            sortedDiskQueue.add(headLocation);
-        } 
         sortedDiskQueue.add(0);
         sortedDiskQueue.add(199);
         Collections.sort(sortedDiskQueue);
+        
+        for (int value : sortedDiskQueue) {
+            if (value <= headLocation) {
+                lowerValues.add(value);
+            } else {
+                higherValues.add(value);
+            }
+        }
+        
+        if (directionOfMovement.equalsIgnoreCase("Left")) {
+            Collections.sort(lowerValues, Collections.reverseOrder());
+            Collections.sort(higherValues, Collections.reverseOrder());
+        }
+        
+        System.out.println("Sorted: " + sortedDiskQueue);
+        System.out.println("Lower: " + lowerValues);
+        System.out.println("Higher: " + higherValues);
     }
     
     public void startSimulation() {
@@ -59,7 +73,7 @@ public class CSCAN implements PausableSimulator, Runnable {
         timer = new Timer(simulationSpeed, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (iteration >= sortedDiskQueue.size() - 1) {
+                if (index1 >= higherValues.size() && index2 >= lowerValues.size()) {
                     endSimulation();
                     return;
                 }
@@ -73,7 +87,6 @@ public class CSCAN implements PausableSimulator, Runnable {
                 
                 headMovements.add(new Movement(headLocation, nextValue));
                 headLocation = nextValue;
-                iteration++;
                 
                 updateSimulationClock();
                 displayGraph();
@@ -109,23 +122,25 @@ public class CSCAN implements PausableSimulator, Runnable {
     }
     
     private int getNextHeadPosition() {
-        int currentIndex = sortedDiskQueue.indexOf(headLocation);
+        int value = -1;
         
         if (directionOfMovement.equalsIgnoreCase("Right")) {
-            if (currentIndex < sortedDiskQueue.size() - 1) {
-                return sortedDiskQueue.get(currentIndex + 1);
-            } else {
-                // reached 199, wrap around to 0
-                return sortedDiskQueue.get(0);
+            if (index1 < higherValues.size()) {
+                value = higherValues.get(index1++);
+            } else if (index2 < lowerValues.size()) {
+                directionOfMovement = "Left";
+                value = lowerValues.get(index2++);
             }
-        } else { // "Left"
-            if (currentIndex > 0) {
-                return sortedDiskQueue.get(currentIndex - 1);
-            } else {
-                // reached to 0, wrap around to 199
-                return sortedDiskQueue.get(sortedDiskQueue.size() - 1);
+        } else { // Left
+            if (index2 < lowerValues.size()) {
+                value = lowerValues.get(index2++);
+            } else if (index1 < higherValues.size()) {
+                directionOfMovement = "Right";
+                value = higherValues.get(index1++);
             }
         }
+        
+        return value;
     }
     
     private void endSimulation() {

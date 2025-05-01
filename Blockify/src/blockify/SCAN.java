@@ -1,6 +1,3 @@
-/* need editing: make sure that headLocation is always added into diskQueue
-*/
-
 package blockify;
 
 import java.awt.event.ActionEvent;
@@ -13,6 +10,8 @@ public class SCAN implements PausableSimulator, Runnable {
     
     private final ArrayList<Integer> diskQueue;
     private final ArrayList<Integer> sortedDiskQueue;
+    private final ArrayList<Integer> lowerValues = new ArrayList<>();
+    private final ArrayList<Integer> higherValues = new ArrayList<>();
     private final ArrayList<Movement> headMovements;
     private int headLocation;
     private int simulationSpeed;
@@ -26,8 +25,8 @@ public class SCAN implements PausableSimulator, Runnable {
     private boolean isPaused = false;
     private long pauseStartTime;
     private int totalSeekTime = 0;
-    private int iteration = 0;
-    private int pivotIndex;
+    private int index1 = 0;
+    private int index2 = 0;
     private Timer timer;
     
     public SCAN(Simulator simulator, CartesianPanel cartesian, ArrayList<Integer> diskQueue, ArrayList<Movement> headMovements, int headLocation, String directionOfMovement, int simulationSpeed, SimulationContext simulation) {
@@ -41,13 +40,17 @@ public class SCAN implements PausableSimulator, Runnable {
         this.simulator = simulator;
         
         this.sortedDiskQueue = new ArrayList<>(diskQueue);
-        if (!sortedDiskQueue.contains(headLocation)) {
-            sortedDiskQueue.add(headLocation);
-        } 
         sortedDiskQueue.add(directionOfMovement.equalsIgnoreCase("Left") ? 0 : 199);
         Collections.sort(sortedDiskQueue);
         
-        this.pivotIndex = sortedDiskQueue.indexOf(headLocation);
+        for (int value : sortedDiskQueue) {
+            if (value <= headLocation) {
+                lowerValues.add(value);
+            } else {
+                higherValues.add(value);
+            }
+        }
+        Collections.sort(lowerValues, Collections.reverseOrder());
     }
     
     public void startSimulation() {
@@ -61,7 +64,7 @@ public class SCAN implements PausableSimulator, Runnable {
         timer = new Timer(simulationSpeed, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (iteration >= sortedDiskQueue.size() - 1) {
+                if (index1 >= higherValues.size() && index2 >= lowerValues.size()) {
                     endSimulation();
                     return;
                 }
@@ -75,7 +78,6 @@ public class SCAN implements PausableSimulator, Runnable {
                 
                 headMovements.add(new Movement(headLocation, nextValue));
                 headLocation = nextValue;
-                iteration++;
                 
                 updateSimulationClock();
                 displayGraph();
@@ -111,25 +113,25 @@ public class SCAN implements PausableSimulator, Runnable {
     }
     
     private int getNextHeadPosition() {
-        int currentIndex = sortedDiskQueue.indexOf(headLocation);
+        int value = -1;
         
         if (currentDirection.equalsIgnoreCase("Right")) {
-            if (currentIndex < sortedDiskQueue.size() - 1 && currentIndex >= pivotIndex) {
-                return sortedDiskQueue.get(currentIndex + 1);
-            } else {
+            if (index1 < higherValues.size()) {
+                value = higherValues.get(index1++);
+            } else if (index2 < lowerValues.size()) {
                 currentDirection = "Left";
-                pivotIndex--;
-                return sortedDiskQueue.get(pivotIndex);
+                value = lowerValues.get(index2++);
             }
-        } else { // "Left"
-            if (currentIndex > 0 && currentIndex <= pivotIndex) {
-                return sortedDiskQueue.get(currentIndex - 1);
-            } else {
+        } else { // Left
+            if (index2 < lowerValues.size()) {
+                value = lowerValues.get(index2++);
+            } else if (index1 < higherValues.size()) {
                 currentDirection = "Right";
-                pivotIndex++;
-                return sortedDiskQueue.get(pivotIndex);
+                value = higherValues.get(index1++);
             }
         }
+        
+        return value;
     }
     
     private void endSimulation() {
